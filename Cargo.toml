@@ -1,0 +1,10 @@
+[package]
+ name       = "hopper"
+ version    = "0.1.0"
+ edition    = "2021"
+ authors    = ["DUPONT Victor <dupnt.victor@gmail.com>"]
+ license    = "GPL-3.0-or-later"
+ readme     = "README.md"
+
+[dependencies]
+ rusty-toolkit = { path = "../rusty-toolkit" }
