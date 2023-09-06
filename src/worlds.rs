@@ -149,7 +149,7 @@
         pub(crate) fn get_entities(&self, bit_mask_filter: B) -> Vec<Entity> {
             self.entities
                 .iter()
-                .filter(|(_, bit_mask)| bit_mask.has_bit_mask(bit_mask_filter))
+                .filter(|(_, bit_mask)| bit_mask.has_bits(bit_mask_filter))
                 .map(|(entity, _)| *entity)
                 .collect()
         } // fn ..
@@ -163,7 +163,7 @@
                 .enumerate()
                 .find_map(|(index, id)| {
                     match id == &type_id {
-                        true  => Some(B::bit(index as u8)),
+                        true  => Some(B::nth_bit(index as u8)),
                         false => None,
                     } // match ..
                 }) {
@@ -185,8 +185,8 @@
                     return match id == &flag {
                         true => Some(
                                 match variant {
-                                Some(variant) => ((variant << range.start) & B::bit_mask(range.clone())) << self.components.len() as u8,
-                                None          => B::bit_mask(range.clone()),
+                                Some(variant) => ((variant << range.start) & B::range_bit_mask(range.clone())) << self.components.len() as u8,
+                                None          => B::range_bit_mask(range.clone()),
                             } // match ..
                         ), // => ..
                         false => None,
@@ -221,7 +221,7 @@
             entity_bit_mask: &mut B,
         ) -> Result<(), EcsErr<B, F, P>> {
 
-            entity_bit_mask.set_bit_mask(self.component_bit_mask::<C>()?);
+            entity_bit_mask.set_bits(self.component_bit_mask::<C>()?);
 
             self.get_mut_component_column::<C>()?.insert(entity, Rc::new(RefCell::new(component)));
             Ok(())
@@ -236,7 +236,7 @@
             entity_bit_mask: &mut B,
         ) -> Result<(), EcsErr<B, F, P>> {
             
-            entity_bit_mask.set_bit_mask(self.component_bit_mask::<C>()?);
+            entity_bit_mask.set_bits(self.component_bit_mask::<C>()?);
 
             self.get_mut_component_column::<C>()?.insert(entity, component.clone());
             Ok(())
@@ -251,7 +251,7 @@
             entity_bit_mask: &mut B,
         ) -> Result<(), EcsErr<B, F, P>> {
 
-            entity_bit_mask.set_bit_mask(self.flag_bit_mask(flag, variant)?);
+            entity_bit_mask.set_bits(self.flag_bit_mask(flag, variant)?);
             Ok(())
 
         } // fn ..
@@ -261,7 +261,7 @@
             &self,
             entity: Entity,
         ) -> Result<bool, EcsErr<B, F, P>> {
-            Ok(self.get_entity_bit_mask(entity)?.has_bit_mask(self.component_bit_mask::<C>()?))
+            Ok(self.get_entity_bit_mask(entity)?.has_bits(self.component_bit_mask::<C>()?))
         } // fn ..
 
 
@@ -273,7 +273,7 @@
             let bit_mask = self.component_bit_mask::<C>()?;
             entity_group.iter()
                 .map(|entity| match self.get_entity_bit_mask(*entity) {
-                    Ok(entity_bit_mask) => Ok(entity_bit_mask.has_bit_mask(bit_mask)),
+                    Ok(entity_bit_mask) => Ok(entity_bit_mask.has_bits(bit_mask)),
                     Err(err)            => Err(err),
                 }).collect()
 
@@ -286,7 +286,7 @@
             flag:    F,
             variant: Option<B>,
         ) ->Result<bool, EcsErr<B, F, P>> {
-            Ok(self.get_entity_bit_mask(entity)?.has_bit_mask(self.flag_bit_mask(flag, variant)?))
+            Ok(self.get_entity_bit_mask(entity)?.has_bits(self.flag_bit_mask(flag, variant)?))
         } // fn ..
 
 
@@ -300,7 +300,7 @@
             let bit_mask = self.flag_bit_mask(flag, variant)?;
             entity_group.iter()
                 .map(|entity| match self.get_entity_bit_mask(*entity) {
-                    Ok(entity_bit_mask) => Ok(entity_bit_mask.has_bit_mask(bit_mask)),
+                    Ok(entity_bit_mask) => Ok(entity_bit_mask.has_bits(bit_mask)),
                     Err(err)            => Err(err),
                 }).collect()
 
@@ -313,7 +313,7 @@
             entity:    Entity,
         ) -> Result<(), EcsErr<B, F, P>> {
 
-            self.get_entity_bit_mask(entity)?.set_bit_mask(self.component_bit_mask::<C>()?);
+            self.get_entity_bit_mask(entity)?.set_bits(self.component_bit_mask::<C>()?);
             self.get_mut_component_column::<C>()?.insert(entity, Rc::new(RefCell::new(component)));
 
             Ok(())
@@ -337,7 +337,7 @@
                     component_column.insert(*entity, Rc::new(RefCell::new(component.clone())));
                     
                     match self.get_mut_entity_bit_mask(*entity) {
-                        Ok(entity_bit_mask) => { entity_bit_mask.set_bit_mask(bit_mask); Ok(()) },
+                        Ok(entity_bit_mask) => { entity_bit_mask.set_bits(bit_mask); Ok(()) },
                         Err(err)            => Err(err),
                     } // match ..
                 }).collect::<Result<_, EcsErr<B, F, P>>>()?; // map()
@@ -354,7 +354,7 @@
             entity:    Entity,
         ) -> Result<(), EcsErr<B, F, P>> {
 
-            self.get_entity_bit_mask(entity)?.set_bit_mask(self.component_bit_mask::<C>()?);
+            self.get_entity_bit_mask(entity)?.set_bits(self.component_bit_mask::<C>()?);
             self.get_mut_component_column::<C>()?.insert(entity, component.clone());
 
             Ok(())
@@ -377,7 +377,7 @@
                     component_column.insert(*entity, component.clone());
                     
                     match self.get_mut_entity_bit_mask(*entity) {
-                        Ok(entity_bit_mask) => { entity_bit_mask.set_bit_mask(bit_mask); Ok(()) },
+                        Ok(entity_bit_mask) => { entity_bit_mask.set_bits(bit_mask); Ok(()) },
                         Err(err)            => Err(err),
                     } // match ..
                 }).collect::<Result<_, EcsErr<B, F, P>>>()?; // map()
@@ -433,7 +433,7 @@
         ) -> Result<(), EcsErr<B, F, P>> {
 
             let bit_mask = self.component_bit_mask::<C>()?;
-            self.get_mut_entity_bit_mask(entity)?.unset_bit_mask(bit_mask);
+            self.get_mut_entity_bit_mask(entity)?.unset_bits(bit_mask);
             self.get_mut_raw_component_column::<C>()?.remove_entity(entity);
 
             Ok(())
@@ -454,7 +454,7 @@
 
                     self.get_mut_raw_component_column::<C>()?.remove_entity(*entity);
                     match self.get_mut_entity_bit_mask(*entity) {
-                        Ok(entity_bit_mask) => { entity_bit_mask.unset_bit_mask(bit_mask); Ok(()) },
+                        Ok(entity_bit_mask) => { entity_bit_mask.unset_bits(bit_mask); Ok(()) },
                         Err(err)            => Err(err),
                     } // match ..
                 }).collect::<Result<_, EcsErr<B, F, P>>>()?;
@@ -472,7 +472,7 @@
         ) -> Result<(), EcsErr<B, F, P>> {
 
             let bit_mask = self.flag_bit_mask(flag, variant)?;
-            self.get_mut_entity_bit_mask(entity)?.set_bit_mask(bit_mask);
+            self.get_mut_entity_bit_mask(entity)?.set_bits(bit_mask);
             Ok(())
 
         } // fn ..
@@ -491,7 +491,7 @@
                 .iter()
                 .map(|entity|
                     match self.get_mut_entity_bit_mask(*entity) {
-                        Ok(entity_bit_mask) => { entity_bit_mask.set_bit_mask(bit_mask); Ok(()) },
+                        Ok(entity_bit_mask) => { entity_bit_mask.set_bits(bit_mask); Ok(()) },
                         Err(err)            => Err(err),
                     } // match ..
                 ).collect::<Result<_, EcsErr<B, F, P>>>()?;
@@ -509,7 +509,7 @@
         ) -> Result<(), EcsErr<B, F, P>> {
 
             let bit_mask = self.flag_bit_mask(flag, variant)?;
-            self.get_mut_entity_bit_mask(entity)?.unset_bit_mask(bit_mask);
+            self.get_mut_entity_bit_mask(entity)?.unset_bits(bit_mask);
             Ok(())
 
         } // fn ..
@@ -528,7 +528,7 @@
                 .iter()
                 .map(|entity|
                     match self.get_mut_entity_bit_mask(*entity) {
-                        Ok(entity_bit_mask) => { entity_bit_mask.unset_bit_mask(bit_mask); Ok(()) },
+                        Ok(entity_bit_mask) => { entity_bit_mask.unset_bits(bit_mask); Ok(()) },
                         Err(err)            => Err(err),
                     } // match ..
                 ).collect::<Result<_, EcsErr<B, F, P>>>()?;
@@ -551,7 +551,7 @@
             let entity_bit_mask = self.get_entity_bit_mask(entity)?;
             self.component_columns
                 .iter_mut()
-                .map(|(bit_mask, component_column)| if entity_bit_mask.has_bit_mask(*bit_mask) {
+                .map(|(bit_mask, component_column)| if entity_bit_mask.has_bits(*bit_mask) {
 
                         component_column.remove_entity(entity);
                         Ok(())
@@ -619,7 +619,7 @@
                 false => {
                     self.components.push(TypeId::of::<C>());
                     self.component_columns.insert(
-                        B::bit(self.component_count as u8),
+                        B::nth_bit(self.component_count as u8),
                         Box::new(HashMap::<Entity, Rc<RefCell<C>>>::new()
                     )); // insert()
                     self.component_count += 1;

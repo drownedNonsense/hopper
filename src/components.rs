@@ -16,14 +16,13 @@
 
     pub(crate) trait ComponentCell {
         fn as_any(&self) -> &dyn Any;
-    } // trait ComponentCell
-
+    } // trait ..
 
     pub(crate) trait ComponentColumn: Any {
         fn as_any(&self)         -> &dyn Any;
         fn as_any_mut(&mut self) -> &mut dyn Any;
         fn remove_entity(&mut self, entity: Entity);
-    } // trait ComponentColumn
+    } // trait ..
 
 
     pub trait Component: Any + Clone {}
@@ -35,11 +34,11 @@
 
     impl<C: 'static + Component> ComponentCell for Rc<RefCell<C>> {
         fn as_any(&self) -> &dyn Any { self }
-    } // impl ComponentCell ..
+    } // impl ..
 
 
     impl<C: 'static + Component> ComponentColumn for HashMap<Entity, Rc<RefCell<C>>> {
         fn as_any(&self)         -> &dyn Any        { self }
         fn as_any_mut(&mut self) -> &mut dyn Any    { self }
         fn remove_entity(&mut self, entity: Entity) { self.remove(&entity); }
-    } // impl ComponentColumn ..
+    } // impl ..

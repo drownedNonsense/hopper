@@ -25,7 +25,7 @@
         entity:   Entity,
         bit_mask: B,
         world:    &'world mut World<B, F, P>,
-    } // struct EntityBuilder
+    } // struct ..
 
 
     pub(crate) type EntityId = usize;
@@ -47,7 +47,7 @@
             self.world.add_component_to_entity_builder(component, self.entity, &mut self.bit_mask)?;
             Ok(self)
             
-        } // fn with_component()
+        } // fn ..
 
 
         pub fn with_shared_component<C: Component>(mut self, component: &Rc<RefCell<C>>) -> Result<Self, EcsErr<B, F, P>> {
@@ -55,7 +55,7 @@
             self.world.add_shared_component_to_entity_builder(component, self.entity, &mut self.bit_mask)?;
             Ok(self)
 
-        } // fn with_shared_component()
+        } // fn ..
 
 
         pub fn with_flag(
@@ -67,7 +67,7 @@
             self.world.add_flag_to_entity_builder(flag, variant, &mut self.bit_mask)?;
             Ok(self)
 
-        } // fn with_flag()
+        } // fn ..
 
 
         pub fn build(self) -> Entity {
@@ -75,5 +75,6 @@
             self.world.add_entity(self.entity, self.bit_mask);
             self.entity
 
-        } // fn build()
-    } // impl EntityBuilder ..
+        } // fn ..
+    } // impl ..
+    

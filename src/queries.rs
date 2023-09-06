@@ -21,13 +21,13 @@
     pub struct Query<'world, B: BitField, F: BitField, P: Hash + Eq + Debug> {
         entities: Vec<Entity>,
         world:    &'world World<B, F, P>,
-    } // struct Query
+    } // struct ..
 
 
     pub struct QueryBuilder<'world, B: BitField, F: BitField, P: Hash + Eq + Debug> {
         pub(crate) bit_mask: B,
         pub(crate) world:    &'world World<B, F, P>,
-    } // struct QueryBuilder
+    } // struct ..
 
 
 //###############################
@@ -42,7 +42,7 @@
 
         pub fn get_entities(&self) -> Vec<Entity> { self.entities.clone() }
 
-    } // impl Query
+    } // impl ..
 
 
     impl<'world, B: BitField, F: BitField, P: Hash + Eq + Debug> QueryBuilder<'world, B, F, P> {
@@ -70,5 +70,5 @@
                 entities,
                 world: self.world,
             } // Query
-        } // fn build()
-    } // impl QueryBuilder
+        } // fn ..
+    } // impl ..
